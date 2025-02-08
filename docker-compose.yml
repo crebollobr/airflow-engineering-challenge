@@ -8,7 +8,7 @@ x-airflow-common:
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://postgres:postgres@postgresdb:5432/airflow
     AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://postgres:postgres@postgresdb:5432/airflow
     AIRFLOW__CELERY__BROKER_URL: redis://:@airflow-redis:6379/0
-    AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__CORE__FERNET_KEY: 'JsDQTWP3D93rCe71-8_4ojiRK09gF6EcioGQBhKqOuk='
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
@@ -28,6 +28,15 @@ x-airflow-common:
     postgresdb:
       condition: service_healthy
 services:
+
+  airflow-flower:
+    <<: *airflow-common
+    command: celery flower
+    ports:
+      - "5555:5555"
+    depends_on:
+      <<: *airflow-common-depends-on
+
   postgresdb:
     image: postgres:15
     container_name: postgresdb
@@ -110,7 +119,7 @@ services:
       pip install storage_tool &&
       airflow scheduler"
     healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
+      test: ["CMD", "curl", "--fail", "http://localhost:8793/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -139,7 +148,7 @@ services:
       start_period: 30s
     environment:
       <<: *airflow-common-env
-      DUMB_INIT_SETSID: "0"
+      DUMB_INIT_SETSID: "1"
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
@@ -210,8 +219,9 @@ services:
           echo "   https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html#before-you-begin"
           echo
         fi
-        mkdir -p /sources/logs /sources/dags /sources/plugins
+        mkdir -p /sources/logs /sources/dags /sources/plugins /sources/logs/scheduler
         chown -R "${AIRFLOW_UID}:0" /sources/{logs,dags,plugins}
+        chmod -R g+rwx /sources/{logs,dags,plugins} /sources/logs/scheduler /sources/local_storage
         exec /entrypoint airflow version
     environment:
       <<: *airflow-common-env
