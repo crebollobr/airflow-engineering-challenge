@@ -10,7 +10,7 @@ Foram realizadas várias melhorias no arquivo `docker-compose.yaml` para aumenta
 
 1. **Definição da Fernet Key**  
    - **Antes:** Vazia.  
-   - **Agora:** `'JsDQTWP3D93rCe71-8_4ojiRK09gF6EcioGQBhKqOuk='`.  
+   - **Agora:** `xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`.  
    - **Impacto:** Melhora a segurança ao criptografar conexões e senhas armazenadas no Airflow.
 
 2. **Adição do serviço `airflow-flower`**  
